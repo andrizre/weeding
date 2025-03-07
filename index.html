@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Invitation - Pulan & Pulana</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500&display=swap');
+        
+        .font-script {
+            font-family: 'Great Vibes', cursive;
+        }
+        
+        .font-body {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .bg-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            background: #d1b378;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: -1;
+        }
+        
+        .timeline-point {
+            width: 20px;
+            height: 20px;
+            background: #d1b378;
+            border-radius: 50%;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .envelope {
+            transition: all 0.5s ease;
+        }
+        
+        .envelope.open {
+            transform: translateY(-100px);
+            opacity: 0;
+        }
+        
+        .invitation-content {
+            transition: all 1s ease;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .invitation-content.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .count-down {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .count-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60px;
+        }
+        
+        /* Audio player styling */
+        .audio-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-body relative overflow-x-hidden">
+    <!-- Audio Control -->
+    <div class="audio-control" id="audioControl">
+        <i class="fas fa-play text-pink-500" id="audioIcon"></i>
+    </div>
+    <audio id="bgMusic" loop>
+        <source src="audio/kai.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Initial Envelope -->
+    <div class="envelope fixed inset-0 bg-pink-50 flex items-center justify-center z-50" id="envelope">
+        <div class="text-center p-6 max-w-lg">
+            <div class="mb-6">
+                <img src="images/amplop.png" alt="Wedding Rings" class="mx-auto rounded-full">
+            </div>
+            <h1 class="font-script text-5xl mb-4 text-pink-600">Pulan & Pulana</h1>
+            <p class="text-gray-700 mb-6">We are getting married</p>
+            <button id="openInvitation" class="bg-pink-500 hover:bg-pink-600 text-white py-2 px-6 rounded-full transition duration-300 shadow-lg">
+                Open Invitation
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="invitation-content" id="invitationContent">
+        <!-- Hero Section -->
+        <section class="relative h-screen">
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('images/invite.png'); filter: blur(1px);"></div>
+            <div class="absolute inset-0 bg-overlay"></div>
+            <div class="relative h-full flex flex-col items-center justify-center text-white text-center p-6">
+                <h1 class="font-script text-5xl md:text-7xl mb-4">Pulan & Pulana</h1>
+                <p class="text-xl mb-6">We are getting married</p>
+                <div class="mb-8 w-24 h-1 bg-pink-400"></div>
+                <p class="text-lg mb-4">Sabtu, 28 Februari 2025</p>
+                
+                <!-- Countdown Timer -->
+                <div class="count-down mt-8">
+                    <div class="count-box">
+                        <span id="days" class="text-4xl font-bold">00</span>
+                        <span class="text-sm">Hari</span>
+                    </div>
+                    <div class="count-box">
+                        <span id="hours" class="text-4xl font-bold">00</span>
+                        <span class="text-sm">Jam</span>
+                    </div>
+                    <div class="count-box">
+                        <span id="minutes" class="text-4xl font-bold">00</span>
+                        <span class="text-sm">Menit</span>
+                    </div>
+                    <div class="count-box">
+                        <span id="seconds" class="text-4xl font-bold">00</span>
+                        <span class="text-sm">Detik</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Couple Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">Pengantin</h2>
+                
+                <div class="flex flex-col md:flex-row items-center justify-center gap-12 md:gap-24">
+                    <!-- Groom Info -->
+                    <div class="text-center max-w-xs">
+                        <div class="mb-6">
+                            <img src="images/pulan.png" alt="Pulan" class="mx-auto rounded-full w-48 h-48 object-cover border-4 border-pink-200">
+                        </div>
+                        <h3 class="font-script text-3xl text-pink-600 mb-2">Pulan</h3>
+                        <p class="text-gray-600 mb-4">Putra dari Bapak dan Ibu Pulan</p>
+                        <div class="flex justify-center gap-4">
+                            <a href="#" class="text-pink-500"><i class="fab fa-instagram text-xl"></i></a>
+                            <a href="#" class="text-pink-500"><i class="fab fa-facebook text-xl"></i></a>
+                        </div>
+                    </div>
+                    
+                    <!-- Wedding Symbol -->
+                    <div class="text-6xl text-pink-400">&</div>
+                    
+                    <!-- Bride Info -->
+                    <div class="text-center max-w-xs">
+                        <div class="mb-6">
+                            <img src="images/pulana.png" alt="Pulana" class="mx-auto rounded-full w-48 h-48 object-cover border-4 border-pink-200">
+                        </div>
+                        <h3 class="font-script text-3xl text-pink-600 mb-2">Pulana</h3>
+                        <p class="text-gray-600 mb-4">Putri dari Bapak dan Ibu Pulana</p>
+                        <div class="flex justify-center gap-4">
+                            <a href="#" class="text-pink-500"><i class="fab fa-instagram text-xl"></i></a>
+                            <a href="#" class="text-pink-500"><i class="fab fa-facebook text-xl"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Love Story Section -->
+        <section class="py-20 bg-pink-50">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">Kisah Cinta Kami</h2>
+                
+                <div class="relative timeline-container max-w-4xl mx-auto pb-12">
+                    <!-- Timeline Item 1 -->
+                    <div class="mb-24 relative">
+                        <div class="timeline-point top-12"></div>
+                        <div class="md:w-5/12 ml-auto md:mr-16 bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="font-script text-2xl text-pink-600 mb-2">Pertama Bertemu</h3>
+                            <p class="text-gray-600 mb-2">Januari 2023</p>
+                            <p>Kami bertemu pertama kali di sebuah acara pertemanan. Saat itu, kami tidak menyangka bahwa takdir akan mempertemukan kami kembali di masa depan.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline Item 2 -->
+                    <div class="mb-24 relative">
+                        <div class="timeline-point top-12"></div>
+                        <div class="md:w-5/12 mr-auto md:ml-16 bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="font-script text-2xl text-pink-600 mb-2">Mulai Berhubungan</h3>
+                            <p class="text-gray-600 mb-2">Maret 2023</p>
+                            <p>Setelah pertemuan pertama, kami sering menghabiskan waktu bersama. Hari demi hari perasaan kami tumbuh semakin dalam.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Timeline Item 3 -->
+                    <div class="mb-24 relative">
+                        <div class="timeline-point top-12"></div>
+                        <div class="md:w-5/12 ml-auto md:mr-16 bg-white p-6 rounded-lg shadow-lg">
+                            <h3 class="font-script text-2xl text-pink-600 mb-2">Lamaran</h3>
+                            <p class="text-gray-600 mb-2">Desember 2024</p>
+                            <p>Dengan restu dari kedua keluarga, Pulan akhirnya melamar Pulana pada malam tahun baru di bawah langit penuh kembang api.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Details Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">Detail Acara</h2>
+                
+                <div class="flex flex-col md:flex-row gap-8 justify-center">
+                    <!-- Akad Nikah -->
+                    <div class="bg-pink-50 p-8 rounded-lg shadow-lg max-w-sm w-full">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-ring text-4xl text-pink-500"></i>
+                        </div>
+                        <h3 class="font-script text-2xl text-center text-pink-600 mb-4">Akad Nikah</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <i class="far fa-calendar text-pink-500 mr-3"></i>
+                                <span>Sabtu, 28 Februari 2025</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="far fa-clock text-pink-500 mr-3"></i>
+                                <span>08:00 - 10:00 WIB</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-pink-500 mr-3"></i>
+                                <span>Masjid Al-Hikmat<br>Jl. Contoh No. 123, Jakarta</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Resepsi -->
+                    <div class="bg-pink-50 p-8 rounded-lg shadow-lg max-w-sm w-full">
+                        <div class="text-center mb-6">
+                            <i class="fas fa-glass-cheers text-4xl text-pink-500"></i>
+                        </div>
+                        <h3 class="font-script text-2xl text-center text-pink-600 mb-4">Resepsi</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center">
+                                <i class="far fa-calendar text-pink-500 mr-3"></i>
+                                <span>Sabtu, 28 Februari 2025</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="far fa-clock text-pink-500 mr-3"></i>
+                                <span>11:00 - 14:00 WIB</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-map-marker-alt text-pink-500 mr-3"></i>
+                                <span>Grand Ballroom Hotel Mewah<br>Jl. Contoh No. 456, Jakarta</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Google Maps placeholder -->
+                <div class="mt-16 max-w-4xl mx-auto h-64 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <p class="text-gray-500">Map Location Would Appear Here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section class="py-20 bg-pink-50">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">Galeri Foto</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                    <img src="https://via.placeholder.com/300" alt="Pre-wedding Photo" class="w-full h-48 object-cover rounded-lg">
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">RSVP</h2>
+
+                <div class="max-w-md mx-auto bg-pink-50 p-8 rounded-lg shadow-lg">
+                    <p class="text-center mb-6">Mohon konfirmasi kehadiran Anda sebelum 20 Februari 2025</p>
+                    
+                    <form id="rsvpForm" class="space-y-6">
+                        <div>
+                            <label for="name" class="block text-gray-700 mb-2">Nama</label>
+                            <input 
+                                type="text" 
+                                id="name" 
+                                name="name" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                                required 
+                                placeholder="Masukkan nama Anda"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block text-gray-700 mb-2">Email</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                                required 
+                                placeholder="Masukkan email Anda"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-gray-700 mb-2">Nomor Telepon</label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                name="phone" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                                required 
+                                placeholder="Masukkan nomor telepon"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 mb-2">Apakah Anda akan hadir?</label>
+                            <div class="flex space-x-4">
+                                <label class="flex items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="attendance" 
+                                        value="yes" 
+                                        class="mr-2" 
+                                        required
+                                    >
+                                    <span>Ya, saya akan hadir</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input 
+                                        type="radio" 
+                                        name="attendance" 
+                                        value="no" 
+                                        class="mr-2"
+                                    >
+                                    <span>Maaf, saya tidak bisa hadir</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="guests" class="block text-gray-700 mb-2">Jumlah Tamu</label>
+                            <select 
+                                id="guests" 
+                                name="guests" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
+                            >
+                                <option value="1">1 orang</option>
+                                <option value="2">2 orang</option>
+                                <option value="3">3 orang</option>
+                                <option value="4">4 orang</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label for="message" class="block text-gray-700 mb-2">Pesan untuk Pengantin</label>
+                            <textarea 
+                                id="message" 
+                                name="message" 
+                                rows="4" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                                placeholder="Tulis pesan Anda di sini"
+                            ></textarea>
+                        </div>
+                        
+                        <button 
+                            type="submit" 
+                            class="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 px-6 rounded-full transition duration-300 shadow-lg"
+                        >
+                            Kirim RSVP
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Comment Section -->
+                <div class="mt-12 max-w-md mx-auto">
+                    <h3 class="font-bold text-xl text-center text-pink-600 mb-6">Komentar Terbaru</h3>
+                    <div id="commentsContainer" class="space-y-4">
+                        <!-- Komentar akan ditampilkan di sini -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gift Section -->
+        <section class="py-20 bg-pink-50">
+            <div class="container mx-auto px-6">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-16">Hadiah</h2>
+                
+                <div class="max-w-lg mx-auto text-center">
+                    <p class="mb-8">Kehadiran dan doa Anda adalah hadiah terbesar bagi kami. Namun, jika Anda ingin memberikan hadiah, Anda dapat mengirimkannya melalui:</p>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg mb-8">
+                        <h3 class="font-script text-2xl text-pink-600 mb-4">Rekening Bank</h3>
+                        <p class="font-bold mb-1">Pulan</p>
+                        <p class="mb-4">Bank ABC: 1234-5678-9012</p>
+                        
+                        <p class="font-bold mb-1">Pulana</p>
+                        <p>Bank XYZ: 9876-5432-1098</p>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <h3 class="font-script text-2xl text-pink-600 mb-4">Alamat Pengiriman</h3>
+                        <p>Perumahan Bahagia Blok A No. 10<br>Jl. Contoh No. 789, Jakarta</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Thank You Section -->
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="font-script text-4xl md:text-5xl text-center text-pink-600 mb-8">Terima Kasih</h2>
+                <p class="max-w-lg mx-auto mb-8">Terima kasih atas doa dan restu yang diberikan. Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir untuk memberikan doa restu kepada kami.</p>
+                <p class="font-script text-3xl text-pink-600 mb-4">Pulan & Pulana</p>
+                <p>#PulanPulanaBahagia</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-8 bg-pink-600 text-white text-center">
+            <p>© 2025 Pulan & Pulana Wedding</p>
+        </footer>
+    </div>
+
+    <script>
+    $(document).ready(function() {
+        // Open invitation
+        $("#openInvitation").click(function() {
+            $("#envelope").addClass("open");
+            setTimeout(function() {
+                $("#envelope").hide();
+                $("#invitationContent").addClass("show");
+                startCountdown();
+            }, 500);
+        });
+
+        // Fungsi untuk menyimpan komentar ke MockAPI
+        function saveComment(comment) {
+            return $.ajax({
+                url: 'https://67c1315161d8935867e2238b.mockapi.io/comment',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(comment)
+            });
+        }
+
+        // Fungsi untuk mendapatkan komentar dari MockAPI
+        function loadComments() {
+            return $.ajax({
+                url: 'https://67c1315161d8935867e2238b.mockapi.io/comment',
+                method: 'GET',
+                contentType: 'application/json'
+            });
+        }
+
+        // Fungsi untuk memformat waktu dari format ISO ke format yang lebih ramah pengguna
+        function formatTime(timestamp) {
+            const now = new Date();
+            const commentTime = new Date(timestamp);
+            const differenceInSeconds = Math.floor((now - commentTime) / 1000);
+            const differenceInMinutes = Math.floor(differenceInSeconds / 60);
+            const differenceInHours = Math.floor(differenceInMinutes / 60);
+            const differenceInDays = Math.floor(differenceInHours / 24);
+
+            if (differenceInSeconds < 60) {
+                return 'Baru saja';
+            } else if (differenceInMinutes < 60) {
+                return `${differenceInMinutes} menit yang lalu`;
+            } else if (differenceInHours < 24) {
+                return `${differenceInHours} jam yang lalu`;
+            } else if (differenceInDays < 2) {
+                return 'Kemarin';
+            } else {
+                const options = {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                };
+                return commentTime.toLocaleDateString('id-ID', options);
+            }
+        }
+
+        // Fungsi untuk menampilkan komentar di halaman
+        function displayComments() {
+            loadComments().then(comments => {
+                const commentsContainer = document.getElementById('commentsContainer');
+                commentsContainer.innerHTML = ''; // Bersihkan container
+
+                // Sort comments from newest to oldest
+                comments.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+                // Display only the latest 3 comments initially
+                comments.slice(0, 3).forEach(comment => {
+                    const commentDiv = document.createElement('div');
+                    commentDiv.className = 'bg-white p-4 rounded-lg shadow-md';
+
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'flex items-center justify-between mb-2';
+
+                    const nameElement = document.createElement('p');
+                    nameElement.className = 'font-semibold text-gray-800';
+                    nameElement.textContent = comment.name;
+
+                    const timeElement = document.createElement('p');
+                    timeElement.className = 'text-sm text-gray-500';
+                    timeElement.textContent = formatTime(comment.time);
+
+                    const messageElement = document.createElement('p');
+                    messageElement.className = 'text-gray-700';
+                    messageElement.textContent = comment.message;
+
+                    headerDiv.appendChild(nameElement);
+                    headerDiv.appendChild(timeElement);
+
+                    commentDiv.appendChild(headerDiv);
+                    commentDiv.appendChild(messageElement);
+
+                    commentsContainer.appendChild(commentDiv);
+                });
+
+                // Add a "Load More" button if there are more comments
+                if (comments.length > 3) {
+                    const loadMoreButton = document.createElement('button');
+                    loadMoreButton.className = 'w-full bg-pink-500 hover:bg-pink-600 text-white py-2 px-6 rounded-full transition duration-300 shadow-lg mt-4';
+                    loadMoreButton.textContent = 'Load More Comments';
+                    loadMoreButton.addEventListener('click', function() {
+                        comments.slice(3).forEach(comment => {
+                            const commentDiv = document.createElement('div');
+                            commentDiv.className = 'bg-white p-4 rounded-lg shadow-md';
+
+                            const headerDiv = document.createElement('div');
+                            headerDiv.className = 'flex items-center justify-between mb-2';
+
+                            const nameElement = document.createElement('p');
+                            nameElement.className = 'font-semibold text-gray-800';
+                            nameElement.textContent = comment.name;
+
+                            const timeElement = document.createElement('p');
+                            timeElement.className = 'text-sm text-gray-500';
+                            timeElement.textContent = formatTime(comment.time);
+
+                            const messageElement = document.createElement('p');
+                            messageElement.className = 'text-gray-700';
+                            messageElement.textContent = comment.message;
+
+                            headerDiv.appendChild(nameElement);
+                            headerDiv.appendChild(timeElement);
+
+                            commentDiv.appendChild(headerDiv);
+                            commentDiv.appendChild(messageElement);
+
+                            commentsContainer.appendChild(commentDiv);
+                        });
+                        loadMoreButton.style.display = 'none'; // Hide the button after loading more comments
+                    });
+                    commentsContainer.appendChild(loadMoreButton);
+                }
+            });
+        }
+
+        // Event listener untuk form submit
+        document.getElementById('rsvpForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Ambil nilai dari form
+            const name = document.getElementById('name').value;
+            const message = document.getElementById('message').value;
+            const time = new Date().toISOString(); // Simpan waktu saat ini dalam format ISO
+
+            // Buat objek komentar baru
+            const newComment = { name, message, time };
+
+            // Simpan komentar ke MockAPI
+            saveComment(newComment).then(() => {
+                // Tampilkan komentar terbaru
+                displayComments();
+
+                // Reset form
+                this.reset();
+
+                // Tampilkan pesan sukses
+                alert("Terima kasih! RSVP Anda telah diterima.");
+            });
+        });
+
+        // Tampilkan komentar saat halaman dimuat
+        displayComments();
+
+        // Audio control
+        let audioPlaying = false;
+        const bgMusic = document.getElementById("bgMusic");
+        const audioControl = document.getElementById("audioControl");
+        const audioIcon = document.getElementById("audioIcon");
+
+        audioControl.addEventListener("click", function() {
+            if (audioPlaying) {
+                bgMusic.pause();
+                audioIcon.classList.remove("fa-pause");
+                audioIcon.classList.add("fa-play");
+            } else {
+                bgMusic.play();
+                audioIcon.classList.remove("fa-play");
+                audioIcon.classList.add("fa-pause");
+            }
+            audioPlaying = !audioPlaying;
+        });
+
+        // Countdown timer
+        function startCountdown() {
+            const weddingDate = new Date("Feb 28, 2025 08:00:00").getTime();
+
+            // Update the count down every 1 second
+            const x = setInterval(function() {
+                // Get current date and time
+                const now = new Date().getTime();
+
+                // Find the distance between now and the wedding date
+                const distance = weddingDate - now;
+
+                // Time calculations for days, hours, minutes and seconds
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result
+                document.getElementById("days").innerHTML = days.toString().padStart(2, '0');
+                document.getElementById("hours").innerHTML = hours.toString().padStart(2, '0');
+                document.getElementById("minutes").innerHTML = minutes.toString().padStart(2, '0');
+                document.getElementById("seconds").innerHTML = seconds.toString().padStart(2, '0');
+
+                // If the countdown is finished, display some text
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("days").innerHTML = "00";
+                    document.getElementById("hours").innerHTML = "00";
+                    document.getElementById("minutes").innerHTML = "00";
+                    document.getElementById("seconds").innerHTML = "00";
+                }
+            }, 1000);
+        }
+    });
+</script>
+</body>
+</html>
